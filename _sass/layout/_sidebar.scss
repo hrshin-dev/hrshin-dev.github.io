@@ -53,6 +53,26 @@ $sidebar-display: 'sidebar-display'; /* the attribute for sidebar display */
     @extend %sidebar-links;
   }
 
+  .profile-wrapper {
+    @include mx.mt-mb(2.5rem);
+    @extend %clickable-transition;
+
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+    text-align: center;
+
+    @include bp.lg {
+      margin-top: 3rem;
+    }
+
+    @include bp.xxxl {
+      margin-top: 3.5rem;
+      margin-bottom: 2.5rem;
+      padding-left: 0;
+    }
+  }
+
   #avatar {
     display: block;
     width: 6.5rem;
@@ -60,6 +80,7 @@ $sidebar-display: 'sidebar-display'; /* the attribute for sidebar display */
     overflow: hidden;
     box-shadow: var(--avatar-border-color) 0 0 0 2px;
     transform: translateZ(0); /* fixed the zoom in Safari */
+    margin: 0 auto;
 
     @include bp.sm {
       width: 7rem;
@@ -75,25 +96,6 @@ $sidebar-display: 'sidebar-display'; /* the attribute for sidebar display */
     }
   }
 
-  .profile-wrapper {
-    @include mx.mt-mb(2.5rem);
-    @extend %clickable-transition;
-
-    padding-left: 2.5rem;
-    padding-right: 1.25rem;
-    width: 100%;
-
-    @include bp.lg {
-      margin-top: 3rem;
-    }
-
-    @include bp.xxxl {
-      margin-top: 3.5rem;
-      margin-bottom: 2.5rem;
-      padding-left: 3.5rem;
-    }
-  }
-
   .site-title {
     @extend %clickable-transition;
     @extend %sidebar-link-hover;
@@ -105,7 +107,8 @@ $sidebar-display: 'sidebar-display'; /* the attribute for sidebar display */
     letter-spacing: 0.25px;
     margin-top: 1.25rem;
     margin-bottom: 0.5rem;
-    width: fit-content;
+    width: 100%;
+    text-align: center;
     color: var(--site-title-color);
   }
 
@@ -175,12 +178,16 @@ $sidebar-display: 'sidebar-display'; /* the attribute for sidebar display */
   }
 
   .sidebar-bottom {
-    padding-left: 2rem;
-    padding-right: 1rem;
+    padding-left: 0;
+    padding-right: 0;
     margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
 
     @include bp.xxxl {
-      padding-left: 2.75rem;
       margin-bottom: 1.75rem;
     }
 
@@ -189,7 +196,7 @@ $sidebar-display: 'sidebar-display'; /* the attribute for sidebar display */
     %button {
       width: $btn-size;
       height: $btn-size;
-      margin-bottom: $btn-mb; // multi line gap
+      margin-bottom: $btn-mb;
       border-radius: 50%;
       color: var(--sidebar-btn-color);
       background-color: var(--sidebar-btn-bg);

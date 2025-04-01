@@ -1,6 +1,6 @@
 <!-- The Side Bar -->
 
-<aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-end">
+<aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-center">
   <header class="profile-wrapper">
     <a href="{{ '/' | relative_url }}" id="avatar" class="rounded-circle">
       {%- if site.avatar != empty and site.avatar -%}
@@ -28,19 +28,45 @@
       <!-- the real tabs -->
       {% for tab in site.tabs %}
         <li class="nav-item{% if tab.url == page.url %}{{ " active" }}{% endif %}">
-          <a href="{{ tab.url | relative_url }}" class="nav-link">
-            <i class="fa-fw {{ tab.icon }}"></i>
-            {% capture tab_name %}{{ tab.url | split: '/' }}{% endcapture %}
-
-            <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
-          </a>
+          {% if tab.url == '/categories/' %}
+            <a href="#" class="nav-link" id="categories-toggle">
+              <i class="fa-fw {{ tab.icon }}"></i>
+              <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
+              <i class="fa-fw fas fa-chevron-down ms-auto"></i>
+            </a>
+            <ul class="nav sub-nav" style="display: none;">
+              <li class="nav-item">
+                <a href="{{ '/categories/algorithm/' | relative_url }}" class="nav-link">
+                  <i class="fa-fw fas fa-folder"></i>
+                  <span>Algorithm</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ '/categories/unity/' | relative_url }}" class="nav-link">
+                  <i class="fa-fw fas fa-folder"></i>
+                  <span>Unity</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{ '/categories/etc/' | relative_url }}" class="nav-link">
+                  <i class="fa-fw fas fa-folder"></i>
+                  <span>ETC</span>
+                </a>
+              </li>
+            </ul>
+          {% else %}
+            <a href="{{ tab.url | relative_url }}" class="nav-link">
+              <i class="fa-fw {{ tab.icon }}"></i>
+              {% capture tab_name %}{{ tab.url | split: '/' }}{% endcapture %}
+              <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
+            </a>
+          {% endif %}
         </li>
-        <!-- .nav-item -->
       {% endfor %}
     </ul>
   </nav>
 
-  <div class="sidebar-bottom d-flex flex-wrap  align-items-center w-100">
+  <div class="sidebar-bottom d-flex flex-wrap justify-content-center align-items-center w-100">
     {% unless site.theme_mode %}
       <button type="button" class="btn btn-link nav-link" aria-label="Switch Mode" id="mode-toggle">
         <i class="fas fa-adjust"></i>
@@ -95,3 +121,22 @@
   <!-- .sidebar-bottom -->
 </aside>
 <!-- #sidebar -->
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const categoriesToggle = document.getElementById('categories-toggle');
+  const subNav = categoriesToggle.nextElementSibling;
+  const chevron = categoriesToggle.querySelector('.fa-chevron-down');
+
+  categoriesToggle.addEventListener('click', function(e) {
+    e.preventDefault();
+    if (subNav.style.display === 'none') {
+      subNav.style.display = 'block';
+      chevron.style.transform = 'rotate(180deg)';
+    } else {
+      subNav.style.display = 'none';
+      chevron.style.transform = 'rotate(0deg)';
+    }
+  });
+});
+</script>

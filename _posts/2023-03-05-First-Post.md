@@ -1,4 +1,12 @@
-﻿# 게시글
+﻿---
+title: First Post
+date: 2023-03-05 12:00:00 -500
+categories: [ETC]
+tags: [first]
+comments: true
+---
+
+# 게시글
 
 이렇게 작성해야 한다고?
 

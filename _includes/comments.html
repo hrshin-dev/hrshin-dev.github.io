@@ -1,5 +1,5 @@
 <!-- Comments -->
-{% if site.comments.provider %}
+{% if page.comments and site.comments.provider %}
   {% case site.comments.provider %}
     {% when "disqus" %}
       {% include comments/disqus.html %}
@@ -10,4 +10,4 @@
     {% when "custom" %}
       {% include comments/custom.html %}
   {% endcase %}
-{% endif %}
+{% endif %} 
