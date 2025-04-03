@@ -11,6 +11,15 @@ lang: ko
 # Change to your timezone › https://kevinnovak.github.io/Time-Zone-Picker
 timezone: Asia/Seoul
 
+# Jekyll plugins
+plugins:
+  - jekyll-paginate
+  - jekyll-seo-tag
+
+# Pagination settings
+paginate: 10
+paginate_path: "/page:num/"
+
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # ↓ --------------------------
 
@@ -140,10 +149,11 @@ pwa:
     deny_paths:
       # - "/example"  # URLs match `<SITE_URL>/example/*` will not be cached by the PWA
 
-paginate: 10
-
 # The base URL of your site
 baseurl: ""
+
+# 이미지 설정
+disable_img_link: true
 
 # ------------ The following options are not recommended to be modified ------------------
 

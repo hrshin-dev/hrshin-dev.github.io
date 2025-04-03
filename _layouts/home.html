@@ -5,118 +5,188 @@ refactor: true
 
 {% include lang.html %}
 
-{% assign all_pinned = site.posts | where: 'pin', 'true' %}
-{% assign all_normal = site.posts | where_exp: 'item', 'item.pin != true and item.hidden != true' %}
-
-{% assign posts = '' | split: '' %}
-
-<!-- Get pinned posts on current page -->
-
-{% assign visible_start = paginator.page | minus: 1 | times: paginator.per_page %}
-{% assign visible_end = visible_start | plus: paginator.per_page %}
-
-{% if all_pinned.size > visible_start %}
-  {% if all_pinned.size > visible_end %}
-    {% assign pinned_size = paginator.per_page %}
-  {% else %}
-    {% assign pinned_size = all_pinned.size | minus: visible_start %}
-  {% endif %}
-
-  {% for i in (visible_start..all_pinned.size) limit: pinned_size %}
-    {% assign posts = posts | push: all_pinned[i] %}
-  {% endfor %}
-{% else %}
-  {% assign pinned_size = 0 %}
-{% endif %}
-
-<!-- Get normal posts on current page -->
-
-{% assign normal_size = paginator.posts | size | minus: pinned_size %}
-
-{% if normal_size > 0 %}
-  {% if pinned_size > 0 %}
-    {% assign normal_start = 0 %}
-  {% else %}
-    {% assign normal_start = visible_start | minus: all_pinned.size %}
-  {% endif %}
-
-  {% assign normal_end = normal_start | plus: normal_size | minus: 1 %}
-
-  {% for i in (normal_start..normal_end) %}
-    {% assign posts = posts | push: all_normal[i] %}
-  {% endfor %}
-{% endif %}
-
-<div id="post-list" class="flex-grow-1 px-xl-1">
-  {% for post in posts %}
-    <article class="card-wrapper card">
-      <a href="{{ post.url | relative_url }}" class="post-preview row g-0 flex-md-row-reverse">
-        {% assign card_body_col = '12' %}
-
-        {% if post.image %}
-          {% assign src = post.image.path | default: post.image %}
-          {% unless src contains '//' %}
-            {% assign src = post.media_subpath | append: '/' | append: src | replace: '//', '/' %}
-          {% endunless %}
-
-          {% assign alt = post.image.alt | xml_escape | default: 'Preview Image' %}
-
-          {% assign lqip = null %}
-
-          {% if post.image.lqip %}
-            {% capture lqip %}lqip="{{ post.image.lqip }}"{% endcapture %}
-          {% endif %}
-
-          <div class="col-md-5">
-            <img src="{{ src }}" alt="{{ alt }}" {{ lqip }}>
-          </div>
-
-          {% assign card_body_col = '7' %}
-        {% endif %}
-
-        <div class="col-md-{{ card_body_col }}">
-          <div class="card-body d-flex flex-column">
-            <h1 class="card-title my-2 mt-md-0">{{ post.title }}</h1>
-
-            <div class="card-text content mt-0 mb-3">
-              <p>{% include post-description.html %}</p>
-            </div>
-
-            <div class="post-meta flex-grow-1 d-flex align-items-end">
-              <div class="me-auto">
-                <!-- posted date -->
-                <i class="far fa-calendar fa-fw me-1"></i>
-                {% include datetime.html date=post.date lang=lang %}
-
-                <!-- categories -->
-                {% if post.categories.size > 0 %}
-                  <i class="far fa-folder-open fa-fw me-1"></i>
-                  <span class="categories">
-                    {% for category in post.categories %}
-                      {{ category }}
-                      {%- unless forloop.last -%},{%- endunless -%}
-                    {% endfor %}
+<div class="row">
+  <!-- posts -->
+  <div id="post-list" class="flex-grow-1 pe-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <h1 class="card-title">최신 게시글</h1>
+        
+        <div class="post-list">
+          {% assign posts = site.posts | sort: "date" | reverse %}
+          {% assign total_pages = site.posts.size | divided_by: 10.0 | ceil %}
+          {% assign current_page = paginator.page | default: 1 %}
+          {% assign start_index = current_page | minus: 1 | times: 10 %}
+          {% assign end_index = start_index | plus: 9 %}
+          {% for post in posts %}
+            {% assign post_index = forloop.index0 %}
+            {% if post_index >= start_index and post_index <= end_index %}
+              <div class="post-item">
+                <h2 class="post-title">
+                  <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+                </h2>
+                <div class="post-meta">
+                  <span class="post-date">
+                    {% include datetime.html date=post.date tooltip=true lang=lang %}
                   </span>
+                  {% if post.categories.size > 0 %}
+                    <span class="post-categories">
+                      {% for category in post.categories %}
+                        <a href="{{ '/categories/' | relative_url }}{{ category | slugify | url_encode }}/" class="post-category">
+                          {{- category -}}
+                        </a>
+                      {% endfor %}
+                    </span>
+                  {% endif %}
+                </div>
+                {% if post.description %}
+                  <p class="post-description">{{ post.description }}</p>
                 {% endif %}
               </div>
-
-              {% if post.pin %}
-                <div class="pin ms-1">
-                  <i class="fas fa-thumbtack fa-fw"></i>
-                  <span>{{ site.data.locales[lang].post.pin_prompt }}</span>
-                </div>
-              {% endif %}
-            </div>
-            <!-- .post-meta -->
-          </div>
-          <!-- .card-body -->
+            {% endif %}
+          {% endfor %}
         </div>
-      </a>
-    </article>
-  {% endfor %}
-</div>
-<!-- #post-list -->
 
-{% if paginator.total_pages > 1 %}
-  {% include post-paginator.html %}
-{% endif %}
+        <!-- pagination -->
+        {% if total_pages > 1 %}
+          <nav aria-label="Page Navigation">
+            <ul class="pagination justify-content-center mt-4">
+              {% if current_page > 1 %}
+                <li class="page-item">
+                  {% if current_page == 2 %}
+                    <a class="page-link" href="{{ '/' | relative_url }}">
+                      <i class="fas fa-chevron-left"></i>
+                    </a>
+                  {% else %}
+                    <a class="page-link" href="{{ '/page' | append: current_page | minus: 1 | relative_url }}">
+                      <i class="fas fa-chevron-left"></i>
+                    </a>
+                  {% endif %}
+                </li>
+              {% endif %}
+
+              {% for page in (1..total_pages) %}
+                {% if page == current_page %}
+                  <li class="page-item active">
+                    <span class="page-link">{{ page }}</span>
+                  </li>
+                {% elsif page == 1 %}
+                  <li class="page-item">
+                    <a class="page-link" href="{{ '/' | relative_url }}">{{ page }}</a>
+                  </li>
+                {% else %}
+                  <li class="page-item">
+                    <a class="page-link" href="{{ '/page' | append: page | relative_url }}">{{ page }}</a>
+                  </li>
+                {% endif %}
+              {% endfor %}
+
+              {% if current_page < total_pages %}
+                <li class="page-item">
+                  {% if current_page == 1 %}
+                    <a class="page-link" href="{{ '/page2' | relative_url }}">
+                      <i class="fas fa-chevron-right"></i>
+                    </a>
+                  {% else %}
+                    <a class="page-link" href="{{ '/page' | append: current_page | plus: 1 | relative_url }}">
+                      <i class="fas fa-chevron-right"></i>
+                    </a>
+                  {% endif %}
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- panel -->
+  <aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted">
+    {% for _include in layout.panel_includes %}
+      {% assign _include_path = _include | append: '.html' %}
+      {% include {{ _include_path }} lang=lang %}
+    {% endfor %}
+  </aside>
+</div>
+
+<style>
+.post-list {
+  margin-top: 2rem;
+}
+
+.post-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.post-item:last-child {
+  border-bottom: none;
+}
+
+.post-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.post-title a {
+  color: #2c3e50;
+  text-decoration: none;
+}
+
+.post-title a:hover {
+  color: #0366d6;
+}
+
+.post-meta {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+.post-date {
+  margin-right: 1rem;
+}
+
+.post-categories {
+  display: inline-block;
+}
+
+.post-category {
+  color: #0366d6;
+  text-decoration: none;
+  margin-right: 0.5rem;
+}
+
+.post-category:hover {
+  text-decoration: underline;
+}
+
+.post-description {
+  color: #495057;
+  margin-bottom: 0;
+}
+
+.pagination {
+  margin-top: 2rem;
+}
+
+.page-link {
+  color: #0366d6;
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  padding: 0.5rem 1rem;
+}
+
+.page-link:hover {
+  color: #0056b3;
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+}
+
+.page-item.active .page-link {
+  background-color: #0366d6;
+  border-color: #0366d6;
+  color: #fff;
+}
+</style>

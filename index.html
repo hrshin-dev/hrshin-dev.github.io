@@ -1,4 +1,120 @@
 ---
 layout: home
-# Index page
+refactor: true
+panel_includes:
+  - toc
+tail_includes:
+  - related-posts
+  - post-nav
+  - comments
 ---
+
+{% include lang.html %}
+
+<div class="row">
+  <!-- posts -->
+  <div id="post-list" class="flex-grow-1 pe-lg-3">
+    <div class="card">
+      <div class="card-body">
+        <h1 class="card-title">최신 게시글1</h1>
+        <div class="post-list">
+          {% for post in paginator.posts %}
+            <div class="post-item">
+              <h2 class="post-title">
+                <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+              </h2>
+              <div class="post-meta">
+                <span class="post-date">
+                  {% include datetime.html date=post.date tooltip=true lang=lang %}
+                </span>
+                {% if post.categories.size > 0 %}
+                  <span class="post-categories">
+                    {% for category in post.categories %}
+                      <a href="{{ '/categories/' | relative_url }}{{ category | slugify | url_encode }}/" class="post-category">
+                        {{- category -}}
+                      </a>
+                    {% endfor %}
+                  </span>
+                {% endif %}
+              </div>
+              {% if post.description %}
+                <p class="post-description">{{ post.description }}</p>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- panel -->
+  <aside aria-label="Panel" id="panel-wrapper" class="col-xl-3 ps-2 text-muted">
+    <div class="access">
+      {% include_cached update-list.html lang=lang %}
+      {% include_cached trending-tags.html lang=lang %}
+    </div>
+
+    {% for _include in layout.panel_includes %}
+      {% assign _include_path = _include | append: '.html' %}
+      {% include {{ _include_path }} lang=lang %}
+    {% endfor %}
+  </aside>
+</div>
+
+<style>
+.post-list {
+  margin-top: 2rem;
+}
+
+.post-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.post-item:last-child {
+  border-bottom: none;
+}
+
+.post-title {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.post-title a {
+  color: #2c3e50;
+  text-decoration: none;
+}
+
+.post-title a:hover {
+  color: #0366d6;
+}
+
+.post-meta {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+.post-date {
+  margin-right: 1rem;
+}
+
+.post-categories {
+  display: inline-block;
+}
+
+.post-category {
+  color: #0366d6;
+  text-decoration: none;
+  margin-right: 0.5rem;
+}
+
+.post-category:hover {
+  text-decoration: underline;
+}
+
+.post-description {
+  color: #495057;
+  margin-bottom: 0;
+}
+</style>

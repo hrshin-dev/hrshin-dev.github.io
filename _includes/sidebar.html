@@ -35,22 +35,28 @@
               <i class="fa-fw fas fa-chevron-down ms-auto"></i>
             </a>
             <ul class="nav sub-nav" style="display: none;">
+              {% assign algorithm_posts = site.posts | where: "categories", "Algorithm" | size %}
               <li class="nav-item">
                 <a href="{{ '/categories/algorithm/' | relative_url }}" class="nav-link">
                   <i class="fa-fw fas fa-folder"></i>
                   <span>Algorithm</span>
+                  <span class="text-muted ms-1">({{ algorithm_posts }})</span>
                 </a>
               </li>
+              {% assign unity_posts = site.posts | where: "categories", "Unity" | size %}
               <li class="nav-item">
                 <a href="{{ '/categories/unity/' | relative_url }}" class="nav-link">
                   <i class="fa-fw fas fa-folder"></i>
                   <span>Unity</span>
+                  <span class="text-muted ms-1">({{ unity_posts }})</span>
                 </a>
               </li>
+              {% assign etc_posts = site.posts | where: "categories", "ETC" | size %}
               <li class="nav-item">
                 <a href="{{ '/categories/etc/' | relative_url }}" class="nav-link">
                   <i class="fa-fw fas fa-folder"></i>
                   <span>ETC</span>
+                  <span class="text-muted ms-1">({{ etc_posts }})</span>
                 </a>
               </li>
             </ul>

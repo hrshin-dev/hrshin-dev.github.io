@@ -1,0 +1,134 @@
+/* 게시글 내 이미지의 마우스 오버 효과 및 모든 이미지 효과 제거 */
+.content img, 
+.post-content img, 
+.post img,
+article img,
+.post-content p img,
+.markdown-body img,
+div img,
+p img,
+img {
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  opacity: 1 !important;
+  animation: none !important;
+  -webkit-filter: none !important;
+  -webkit-transition: none !important;
+  -webkit-transform: none !important;
+  -webkit-animation: none !important;
+  background: transparent !important;
+  animation-name: none !important;
+  animation-duration: 0s !important;
+  animation-timing-function: none !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 0 !important;
+  animation-direction: normal !important;
+  animation-fill-mode: none !important;
+  animation-play-state: running !important;
+  text-shadow: none !important;
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+/* 모든 이미지 호버 효과 무력화 */
+.content img:hover, 
+.post-content img:hover, 
+.post img:hover,
+article img:hover,
+.markdown-body img:hover,
+* img:hover,
+img:hover {
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  -webkit-filter: none !important;
+  -webkit-transition: none !important;
+  -webkit-transform: none !important;
+  -webkit-animation: none !important;
+  -webkit-box-shadow: none !important;
+  background: transparent !important;
+  animation: none !important;
+  text-shadow: none !important;
+  cursor: default !important;
+}
+
+/* 이미지 링크 효과 제거 */
+a img, a:hover img {
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  animation: none !important;
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+/* 이미지를 포함하는 링크의 클릭 이벤트 차단 */
+a:has(img) {
+  pointer-events: none !important;
+  cursor: default !important;
+}
+
+/* popup 효과 제거 */
+.content a.popup,
+.content a.img-link,
+a.popup,
+a img,
+a.img-link,
+[class*="medium-zoom"],
+[class*="zoom"],
+.medium-zoom-image,
+.zoom-image,
+.zoomable {
+  cursor: default !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+  animation: none !important;
+  pointer-events: none !important;
+}
+
+/* 이미지 관련 모든 애니메이션 제거 */
+@keyframes none {
+  0% { }
+  100% { }
+}
+
+/* 심머 효과 제거 */
+[class*="shimmer"],
+[class*="shine"],
+[class*="glimmer"],
+[class*="glow"],
+.shimmer,
+.shine,
+.glimmer,
+.glow {
+  animation: none !important;
+  background: none !important;
+  -webkit-animation: none !important;
+  background-image: none !important;
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+
+/* 이미지 확대 오버레이와 모달 비활성화 */
+.medium-zoom-overlay,
+.medium-zoom-image--opened,
+.zoom-overlay,
+.zoom-image--opened,
+[class*="lightbox"],
+.lightbox,
+[class*="modal"],
+.modal-backdrop,
+.modal {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+} 
