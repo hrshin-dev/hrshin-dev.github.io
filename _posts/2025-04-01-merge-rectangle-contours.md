@@ -1,0 +1,334 @@
+---
+title: 유니티에서 사각형 컨투어 병합하기
+date: 2025-04-01 12:00:00 +0900
+categories: [Unity]
+tags: [unity, gamedev, algorithm, contour, grid]
+description: 유니티에서 여러 개의 사각형 영역을 병합하여 외곽선(컨투어)만 그리는 알고리즘을 구현하는 방법을 설명합니다.
+---
+
+## 참고 영상
+[유튜브 링크](https://youtu.be/ku_thRxLXPw?si=HqZgAWwuNiLd1bPk)
+
+## 문제 상황
+10x10 타일 영역에서 여러 개의 사각형을 병합하여 외곽선만 그리고 싶습니다.
+
+- 시작점이 (0,0)이면서 가로세로 3x4인 사각형이 있습니다. (파란색)
+- 시작점이 (1,1)이면서 가로세로 3x3인 사각형도 있습니다. (빨간색)
+
+<img src="/assets/img/posts/2025-04-01-merge-rectangle/mr1.png" width="70%">
+
+두 사각형을 합쳐서 외곽선을 그리는 알고리즘을 구현하겠습니다.
+
+## 접근 방법
+
+여러 사각형을 병합할 때 발생하는 도전 과제들:
+1. 사각형이 겹치거나 인접한 경우를 처리해야 함
+2. 구멍이 있는 경우도 처리해야 함
+3. 최적화된 외곽선 점들을 찾아야 함
+
+## 알고리즘 설계
+
+### 1. 각 사각형의 꼭짓점 좌표 수집
+
+우선 각 사각형의 꼭짓점 좌표를 모아줍니다:
+- 파란색: (0,0), (0,4), (3,4), (3,0)
+- 빨간색: (1,1), (1,4), (4,4), (4,1)
+
+### 2. 좌표 정렬 및 중복 제거
+
+x좌표와 y좌표를 각각 모아서 중복을 제거하고 정렬합니다:
+- x좌표: 0, 1, 3, 4
+- y좌표: 0, 1, 4
+
+<img src="/assets/img/posts/2025-04-01-merge-rectangle/mr2.png" width="70%">
+
+### 3. 그리드 재구성
+
+이 좌표들을 사용하여 새로운 그리드를 만듭니다. 이렇게 하면 원래 10x10 그리드 대신 더 작은 차원의 3x2 그리드로 문제를 축소할 수 있습니다.
+
+```csharp
+public class ReGridInfo
+{
+    public int width;
+    public int height;
+    public List<GridInfo> grids = new();
+    
+    private List<int> gridCnt = new();
+    private Dictionary<Int64, SegmentInfo> lineMap = new();
+    
+    public ReGridInfo(List<int> xList, List<int> yList)
+    {
+        width = xList.Count - 1;
+        height = yList.Count - 1;
+        
+        grids.Clear();
+        for (var i = 0; i < height; i++)
+        {
+            var h = yList[i + 1] - yList[i];
+            for (var j = 0; j < width; j++)
+            {
+                var w = xList[j + 1] - xList[j];
+                grids.Add(new GridInfo(xList[j], yList[i], w, h));
+            }
+        }
+        
+        gridCnt = Enumerable.Repeat(0, width * height).ToList();
+    }
+}
+```
+
+### 4. 셀 영역 카운팅
+
+각 그리드 셀이 원래 사각형들과 얼마나 겹치는지 카운트합니다:
+
+```csharp
+public void CheckGridCount(RectInt rect)
+{
+    for (var i = rect.xMin; i < rect.xMax; i++)
+    {
+        for (var j = rect.yMin; j < rect.yMax; j++)
+        {
+            var idx = grids.FindIndex(x => x.rect.xMin == i && x.rect.yMin == j);
+            if (idx >= 0)
+            {
+                gridCnt[idx]++;
+            }
+        }
+    }
+}
+```
+
+### 5. 외곽선 선분 추출
+
+각 셀의 외곽선을 추출하고, 두 셀 사이의 공유된 선분은 제거합니다:
+
+<img src="/assets/img/posts/2025-04-01-merge-rectangle/mr3.png" width="70%">
+<img src="/assets/img/posts/2025-04-01-merge-rectangle/mr4.png" width="70%">
+
+```csharp
+public void MakeLines()
+{
+    foreach (var i in gridCnt.Select((value, index) => new { value, index }).Where(g => g.value > 0))
+    {
+        var cell = grids[i.index].rect;
+        var lines = new SegmentInfo[]
+        {
+            new SegmentInfo(new int2(cell.xMin, cell.yMin), new int2(cell.xMin, cell.yMax)), // W
+            new SegmentInfo(new int2(cell.xMin, cell.yMax), new int2(cell.xMax, cell.yMax)), // N
+            new SegmentInfo(new int2(cell.xMax, cell.yMax), new int2(cell.xMax, cell.yMin)), // E
+            new SegmentInfo(new int2(cell.xMax, cell.yMin), new int2(cell.xMin, cell.yMin)), // S
+        };
+        
+        for (var j = 0; j < lines.Length; j++)
+        {
+            if (!lineMap.Remove(lines[j].key))
+            {
+                lineMap[lines[j].key] = lines[j];
+            }
+        }
+    }
+}
+```
+
+### 6. 외곽선 정렬
+
+외곽선 선분들을 시계 방향으로 정렬하여 연결된 경로를 만듭니다:
+
+<img src="/assets/img/posts/2025-04-01-merge-rectangle/mr5.png" width="70%">
+
+```csharp
+public List<int2> AlignLines(bool outline = true)
+{
+    if (lineMap == null || lineMap.Count == 0)
+        return null;
+    
+    var startLine = lineMap.Select(s => s.Value).OrderBy(o => o.start.x).ThenBy(o => o.start.y).FirstOrDefault();
+    
+    if (startLine == null)
+        return null;
+    
+    var pointList = new List<int2>
+    {
+        startLine.start,
+        startLine.end
+    };
+    
+    var lastSide = startLine.side;
+    var lastPoint = startLine.end;
+    var ruleofside = outline ?
+                    new SegmentInfo.Side[] { SegmentInfo.Side.West, SegmentInfo.Side.North, SegmentInfo.Side.East } :
+                    new SegmentInfo.Side[] { SegmentInfo.Side.East, SegmentInfo.Side.North, SegmentInfo.Side.West };
+    lineMap.Remove(startLine.key);
+    
+    while (lineMap.Count > 0)
+    {
+        var bFind = false;
+        for (var i = 0; i < ruleofside.Length; i++)
+        {
+            var findSide = (SegmentInfo.Side)(((int)lastSide + (int)ruleofside[i]) % (int)SegmentInfo.Side.Cnt);
+            var findLine = lineMap.Select(s => s.Value).Where(w => w.side == findSide && w.start.Equals(lastPoint)).FirstOrDefault();
+            if (findLine != null)
+            {
+                lastSide = findSide;
+                lastPoint = findLine.end;
+                pointList.Add(findLine.end);
+                lineMap.Remove(findLine.key);
+                bFind = true;
+                break;
+            }
+        }
+        
+        if (!bFind)
+            break;
+    }
+    
+    return pointList;
+}
+```
+
+### 7. LineRenderer로 렌더링
+
+LineRenderer 컴포넌트를 사용하여 최종 외곽선을 그립니다:
+
+<img src="/assets/img/posts/2025-04-01-merge-rectangle/mr6.png" width="70%">
+
+```csharp
+private void MergeRect()
+{
+    var xList = GetXList(rectList);
+    var yList = GetYList(rectList);
+    
+    gridInfo = new ReGridInfo(xList, yList);
+    
+    for (var i = 0; i < rectList.Count; i++)
+    {
+        gridInfo.CheckGridCount(rectList[i]);
+    }
+    gridInfo.MakeLines();
+    var points = gridInfo.AlignLines();
+    if (points != null && points.Count > 0)
+    {
+        _lineRenderer.positionCount = points.Count;
+        for (var i = 0; i < points.Count; i++)
+        {
+            _lineRenderer.SetPosition(i, new Vector3(points[i].x, points[i].y, 0));
+        }
+    }
+    else
+    {
+        _lineRenderer.positionCount = 0;
+    }
+    
+    // 구멍이 있는 경우에도 처리
+    var points_hole = gridInfo.AlignLines(false);
+    if (points_hole != null && points_hole.Count > 0)
+    {
+        _lineRenderer_h.positionCount = points_hole.Count;
+        for (var i = 0; i < points_hole.Count; i++)
+        {
+            _lineRenderer_h.SetPosition(i, new Vector3(points_hole[i].x, points_hole[i].y, 0));
+        }
+    }
+    else
+    {
+        _lineRenderer_h.positionCount = 0;
+    }
+}
+```
+
+## 구현 결과
+
+### 다양한 사각형 병합 예시
+
+여러 사각형 그룹이 있는 경우에도 알고리즘이 잘 작동합니다:
+
+<img src="/assets/img/posts/2025-04-01-merge-rectangle/mr7.png" width="70%">
+<img src="/assets/img/posts/2025-04-01-merge-rectangle/mr8.png" width="70%">
+<img src="/assets/img/posts/2025-04-01-merge-rectangle/mr9.png" width="70%">
+
+## 핵심 구성 요소
+
+### 1. GridInfo 클래스
+사각형 정보를 관리하는 클래스입니다.
+
+```csharp
+public class GridInfo
+{
+    public RectInt rect;
+    
+    public GridInfo(int x, int y)
+    {
+        rect = new RectInt(x, y, 1, 1);
+    }
+    
+    public GridInfo(int x, int y, int w, int h)
+    {
+        rect = new RectInt(x, y, w, h);
+    }
+}
+```
+
+### 2. SegmentInfo 클래스
+선분 정보를 관리하는 클래스입니다. 각 선분은 방향(North, East, South, West)을 가지고 있고 고유한 키 값을 가집니다.
+
+```csharp
+public class SegmentInfo
+{
+    public enum Side
+    {
+        North,
+        East,
+        South,
+        West,
+        Cnt
+    }
+    public int2 start;
+    public int2 end;
+    public Side side;
+    public Int64 key;
+    
+    // 선분의 고유 키 생성 로직
+    public SegmentInfo(int2 s, int2 e)
+    {
+        start = s;
+        end = e;
+        
+        if (start.x != end.x)
+        {
+            side = start.x < end.x ? Side.East : Side.West;
+        }
+        else if (start.y != end.y)
+        {
+            side = start.y < end.y ? Side.North : Side.South;
+        }
+        else
+            side = Side.Cnt;
+        
+        key = MakeSegKey(start.x, start.y, end.x, end.y);
+    }
+    
+    // ... 키 생성 메서드
+}
+```
+
+### 3. ReGridInfo 클래스
+그리드를 재구성하고 외곽선을 만드는 클래스입니다.
+
+## 결론
+
+이 알고리즘을 사용하면 여러 개의 사각형을 효과적으로 병합하여 외곽선만 그릴 수 있습니다. 주요 단계는 다음과 같습니다:
+
+1. 모든 사각형의 꼭짓점 좌표 수집
+2. 좌표 정렬 및 중복 제거
+3. 새 그리드 생성
+4. 각 셀의 포함 횟수 카운트
+5. 외곽선 선분 추출
+6. 외곽선 선분 정렬
+7. LineRenderer로 렌더링
+
+이 알고리즘의 장점은 다음과 같습니다:
+- 복잡한 모양도 처리 가능
+- 구멍이 있는 영역도 처리 가능
+- 최적화된 외곽선 점 생성
+
+개선 가능한 부분: 현재는 사각형을 더하는 기능만 있고 제거하는 기능은 없습니다. 추후 사각형 제거 기능을 추가할 예정입니다. 
