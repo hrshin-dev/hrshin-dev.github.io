@@ -74,12 +74,12 @@
 
   <!-- 방문자 통계 -->
   <div class="visitor-stats mt-2 mb-3 text-center w-100">
-    <div class="visitor-box p-3">
-      <div class="visitor-header d-flex justify-content-around mb-2">
+    <div class="visitor-box p-3 mx-auto">
+      <div class="visitor-header d-flex justify-content-around mb-2 w-100">
         <span class="fs-6 visitor-text">Today</span>
         <span class="fs-6 visitor-text">Total</span>
       </div>
-      <div class="visitor-counts d-flex justify-content-around">
+      <div class="visitor-counts d-flex justify-content-around w-100">
         <div class="visitor-today">
           <span id="today-count" class="fs-5 fw-bold visitor-text">0</span>
           <img src="https://hits.sh/hrshin-dev.github.io.svg?view=today&extraTag=today&style=flat" alt="오늘 방문자 수" width="0" height="0" style="display: none;">
@@ -198,6 +198,10 @@ document.addEventListener('DOMContentLoaded', function() {
   background-color: rgba(235, 235, 235, 0.1);
   border-radius: 5px;
   padding: 8px;
+  width: 100%;
+  margin: 0.5rem auto;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 .visitor-item {
@@ -214,7 +218,11 @@ document.addEventListener('DOMContentLoaded', function() {
   border-radius: 6px;
   padding: 5px 15px;
   min-width: 60px;
+  width: 90%;
+  max-width: 200px;
+  margin: 0 auto;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: block;
 }
 
 .visitor-text {
