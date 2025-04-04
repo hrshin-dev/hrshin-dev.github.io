@@ -82,11 +82,11 @@
       <div class="visitor-counts d-flex justify-content-around w-100">
         <div class="visitor-today">
           <span id="today-count" class="fs-5 fw-bold visitor-text">0</span>
-          <img src="https://hits.sh/hrshin-dev.github.io.svg?view=today&extraTag=today&style=flat" alt="오늘 방문자 수" width="0" height="0" style="display: none;">
+          <img src="https://hits.sh/hrshin-dev.github.io.svg?view=today&extraTag=today" alt="오늘 방문자 수" width="0" height="0" style="display: none;">
         </div>
         <div class="visitor-total">
           <span id="total-count" class="fs-5 fw-bold visitor-text">0</span>
-          <img src="https://hits.sh/hrshin-dev.github.io.svg?view=total&extraTag=total&style=flat" alt="총 방문자 수" width="0" height="0" style="display: none;">
+          <img src="https://hits.sh/hrshin-dev.github.io.svg?view=total&extraTag=total" alt="총 방문자 수" width="0" height="0" style="display: none;">
         </div>
       </div>
     </div>
@@ -218,20 +218,19 @@
       }
       
       // 오늘 방문자 수 가져오기 - mode를 'no-cors'로 설정
-      fetch('https://hits.sh/hrshin-dev.github.io.json?view=today&extraTag=today', {
+      fetch('https://hits.sh/hrshin-dev.github.io.svg?view=today&extraTag=today', {
         mode: 'no-cors',
         cache: 'no-cache'
       })
         .then(response => {
-          if (!response.ok && response.type !== 'opaque') {
-            throw new Error('네트워크 응답이 올바르지 않습니다');
-          }
-          return response.json();
-        })
-        .then(data => {
-          const todayCount = document.getElementById('today-count');
-          if (todayCount && data && data.hits) {
-            todayCount.textContent = data.hits;
+          // no-cors 모드에서는 response.json()을 사용할 수 없음
+          // 대신 이미지로 방문자 수 표시
+          console.log('방문자 수 이미지로 표시');
+          const todayImg = document.querySelector('.visitor-today img');
+          if (todayImg) {
+            todayImg.style.display = 'inline';
+            todayImg.width = 'auto';
+            todayImg.height = 'auto';
           }
         })
         .catch(error => {
@@ -246,20 +245,19 @@
         });
       
       // 총 방문자 수 가져오기
-      fetch('https://hits.sh/hrshin-dev.github.io.json?view=total&extraTag=total', {
+      fetch('https://hits.sh/hrshin-dev.github.io.svg?view=total&extraTag=total', {
         mode: 'no-cors',
         cache: 'no-cache'
       })
         .then(response => {
-          if (!response.ok && response.type !== 'opaque') {
-            throw new Error('네트워크 응답이 올바르지 않습니다');
-          }
-          return response.json();
-        })
-        .then(data => {
-          const totalCount = document.getElementById('total-count');
-          if (totalCount && data && data.hits) {
-            totalCount.textContent = data.hits;
+          // no-cors 모드에서는 response.json()을 사용할 수 없음
+          // 대신 이미지로 방문자 수 표시
+          console.log('방문자 수 이미지로 표시');
+          const totalImg = document.querySelector('.visitor-total img');
+          if (totalImg) {
+            totalImg.style.display = 'inline';
+            totalImg.width = 'auto';
+            totalImg.height = 'auto';
           }
         })
         .catch(error => {
