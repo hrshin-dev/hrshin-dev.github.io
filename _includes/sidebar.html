@@ -29,12 +29,12 @@
       {% for tab in site.tabs %}
         <li class="nav-item{% if tab.url == page.url %}{{ " active" }}{% endif %}">
           {% if tab.url == '/categories/' %}
-            <a href="#" class="nav-link" id="categories-toggle">
+            <a href="javascript:void(0)" class="nav-link" id="categories-toggle">
               <i class="fa-fw {{ tab.icon }}"></i>
               <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
               <i class="fa-fw fas fa-chevron-down ms-auto"></i>
             </a>
-            <ul class="nav sub-nav" id="category-submenu">
+            <ul class="nav sub-nav" id="category-submenu" style="display: none;">
               {% assign algorithm_posts = site.posts | where: "categories", "Algorithm" | size %}
               <li class="nav-item">
                 <a href="{{ '/categories/algorithm/' | relative_url }}" class="nav-link">
@@ -164,8 +164,23 @@
       
       if (categoriesToggle && subMenu) {
         console.log('카테고리 요소 찾음');
-        // 페이지 로드 시 기본적으로 숨김 (변경)
-        let isOpen = false; // 상태 변수 추가 - 기본적으로 닫혀있음
+        let isOpen = false; // 상태 변수 추가
+        
+        // 스타일 요소 추가
+        const style = document.createElement('style');
+        style.textContent = `
+          #category-submenu {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+          }
+          #category-submenu.open {
+            max-height: 500px; /* 충분한 높이 */
+            opacity: 1;
+          }
+        `;
+        document.head.appendChild(style);
         
         // 클릭 이벤트 리스너 추가
         categoriesToggle.addEventListener('click', function(e) {
@@ -173,14 +188,11 @@
           e.stopPropagation(); // 이벤트 버블링 방지
           console.log('카테고리 클릭됨');
           
-          // 상태 변수 토글
           isOpen = !isOpen;
           const chevron = categoriesToggle.querySelector('.fa-chevron-down');
           
           if (isOpen) {
-            console.log('하위 메뉴 표시');
-            subMenu.style.display = 'block'; // 먼저 표시
-            // DOM이 업데이트될 시간을 주기 위해 약간의 지연 적용
+            subMenu.style.display = 'block';
             setTimeout(() => {
               subMenu.classList.add('open');
             }, 10);
@@ -189,9 +201,7 @@
               chevron.style.transition = 'transform 0.3s ease';
             }
           } else {
-            console.log('하위 메뉴 숨김');
             subMenu.classList.remove('open');
-            // 트랜지션 완료 후 display none 설정
             setTimeout(() => {
               if (!isOpen) { // 중간에 다시 열리지 않았는지 확인
                 subMenu.style.display = 'none';
@@ -202,13 +212,9 @@
             }
           }
         });
-        
-        console.log('카테고리 클릭 이벤트 등록 완료');
-      } else {
-        console.error('카테고리 요소를 찾을 수 없음');
       }
-    } catch (e) {
-      console.error('카테고리 토글 초기화 중 오류:', e);
+    } catch (error) {
+      console.error('카테고리 토글 초기화 오류:', error);
     }
   }
   
