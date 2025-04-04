@@ -34,7 +34,7 @@
               <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
               <i class="fa-fw fas fa-chevron-down ms-auto"></i>
             </a>
-            <ul class="nav sub-nav" id="category-submenu" style="display: none;">
+            <ul class="nav sub-nav" id="category-submenu">
               {% assign algorithm_posts = site.posts | where: "categories", "Algorithm" | size %}
               <li class="nav-item">
                 <a href="{{ '/categories/algorithm/' | relative_url }}" class="nav-link">
@@ -170,6 +170,7 @@
         // 클릭 이벤트 리스너 추가
         categoriesToggle.addEventListener('click', function(e) {
           e.preventDefault();
+          e.stopPropagation(); // 이벤트 버블링 방지
           console.log('카테고리 클릭됨');
           
           // 상태 변수 토글
@@ -178,13 +179,24 @@
           
           if (isOpen) {
             console.log('하위 메뉴 표시');
-            subMenu.style.display = 'block';
+            subMenu.style.display = 'block'; // 먼저 표시
+            // DOM이 업데이트될 시간을 주기 위해 약간의 지연 적용
+            setTimeout(() => {
+              subMenu.classList.add('open');
+            }, 10);
             if (chevron) {
               chevron.style.transform = 'rotate(180deg)';
+              chevron.style.transition = 'transform 0.3s ease';
             }
           } else {
             console.log('하위 메뉴 숨김');
-            subMenu.style.display = 'none';
+            subMenu.classList.remove('open');
+            // 트랜지션 완료 후 display none 설정
+            setTimeout(() => {
+              if (!isOpen) { // 중간에 다시 열리지 않았는지 확인
+                subMenu.style.display = 'none';
+              }
+            }, 300);
             if (chevron) {
               chevron.style.transform = 'rotate(0deg)';
             }
@@ -301,6 +313,20 @@
   margin: 0.5rem auto;
   text-align: center;
   box-sizing: border-box;
+}
+
+/* 카테고리 하위 메뉴 스타일 */
+#category-submenu {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease-out;
+  opacity: 0;
+}
+
+#category-submenu.open {
+  max-height: 500px; /* 적절한 최대 높이 설정 */
+  opacity: 1;
+  transition: max-height 0.3s ease-in, opacity 0.3s ease-in;
 }
 
 .visitor-item {

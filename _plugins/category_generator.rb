@@ -31,9 +31,37 @@ module Jekyll
       # 중복 제거 및 정렬
       all_categories = all_categories.uniq.sort
       
-      # 각 카테고리에 대한 페이지 생성
+      # _categories 폴더에 이미 있는 카테고리 페이지 확인
+      existing_categories = []
+      
+      # _categories 폴더가 있는지 확인
+      categories_dir = File.join(site.source, '_categories')
+      if Dir.exist?(categories_dir)
+        # _categories 폴더 내의 모든 파일 확인
+        Dir.glob(File.join(categories_dir, '*.md')).each do |file|
+          # 파일 내용 읽기
+          content = File.read(file)
+          # YAML 프론트매터에서 title 추출
+          if content =~ /^---\s*\n(.*?\n)---\s*\n/m
+            front_matter = $1
+            if front_matter =~ /title:\s*(.+)$/
+              # 추출된 title을 소문자로 변환하여 저장
+              category_title = $1.strip.downcase
+              existing_categories << category_title
+            end
+          end
+        end
+      end
+      
+      # 각 카테고리에 대한 페이지 생성 (기존에 존재하지 않는 경우만)
       all_categories.each do |category|
-        site.pages << CategoryPage.new(site, site.source, category)
+        # 소문자로 변환하여 비교
+        category_lower = category.downcase
+        
+        # 이미 _categories 폴더에 있는 카테고리는 건너뜁니다
+        unless existing_categories.include?(category_lower)
+          site.pages << CategoryPage.new(site, site.source, category)
+        end
       end
     end
   end
