@@ -34,7 +34,7 @@
               <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
               <i class="fa-fw fas fa-chevron-down ms-auto"></i>
             </a>
-            <ul class="nav sub-nav" style="display: none;">
+            <ul class="nav sub-nav" id="category-submenu" style="display: none;">
               {% assign algorithm_posts = site.posts | where: "categories", "Algorithm" | size %}
               <li class="nav-item">
                 <a href="{{ '/categories/algorithm/' | relative_url }}" class="nav-link">
@@ -149,48 +149,149 @@
 <!-- #sidebar -->
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const categoriesToggle = document.getElementById('categories-toggle');
-  const subNav = categoriesToggle.nextElementSibling;
-  const chevron = categoriesToggle.querySelector('.fa-chevron-down');
-
-  categoriesToggle.addEventListener('click', function(e) {
-    e.preventDefault();
-    if (subNav.style.display === 'none') {
-      subNav.style.display = 'block';
-      chevron.style.transform = 'rotate(180deg)';
-    } else {
-      subNav.style.display = 'none';
-      chevron.style.transform = 'rotate(0deg)';
+// 페이지 로드 시 바로 실행
+(function() {
+  'use strict';
+  
+  console.log('사이드바 스크립트 로딩');
+  
+  // 카테고리 토글 기능 직접 구현
+  function initCategoryToggle() {
+    try {
+      console.log('카테고리 토글 기능 초기화');
+      const categoriesToggle = document.getElementById('categories-toggle');
+      const subMenu = document.getElementById('category-submenu');
+      
+      if (categoriesToggle && subMenu) {
+        console.log('카테고리 요소 찾음');
+        // 페이지 로드 시 기본적으로 숨김 (변경)
+        let isOpen = false; // 상태 변수 추가 - 기본적으로 닫혀있음
+        
+        // 클릭 이벤트 리스너 추가
+        categoriesToggle.addEventListener('click', function(e) {
+          e.preventDefault();
+          console.log('카테고리 클릭됨');
+          
+          // 상태 변수 토글
+          isOpen = !isOpen;
+          const chevron = categoriesToggle.querySelector('.fa-chevron-down');
+          
+          if (isOpen) {
+            console.log('하위 메뉴 표시');
+            subMenu.style.display = 'block';
+            if (chevron) {
+              chevron.style.transform = 'rotate(180deg)';
+            }
+          } else {
+            console.log('하위 메뉴 숨김');
+            subMenu.style.display = 'none';
+            if (chevron) {
+              chevron.style.transform = 'rotate(0deg)';
+            }
+          }
+        });
+        
+        console.log('카테고리 클릭 이벤트 등록 완료');
+      } else {
+        console.error('카테고리 요소를 찾을 수 없음');
+      }
+    } catch (e) {
+      console.error('카테고리 토글 초기화 중 오류:', e);
     }
-  });
+  }
   
   // 방문자 수 가져오기
   function fetchVisitorCount() {
-    // 오늘 방문자 수 가져오기
-    fetch('https://hits.sh/hrshin-dev.github.io.json?view=today&extraTag=today')
-      .then(response => response.json())
-      .then(data => {
-        document.getElementById('today-count').textContent = data.hits || 0;
+    try {
+      // 로컬 개발 환경 감지
+      const isLocalhost = window.location.hostname === 'localhost' || 
+                          window.location.hostname === '127.0.0.1';
+      
+      if (isLocalhost) {
+        console.log('로컬 개발 환경 감지, 테스트 데이터 사용');
+        // 로컬 테스트 값 설정
+        const todayCount = document.getElementById('today-count');
+        const totalCount = document.getElementById('total-count');
+        if (todayCount) todayCount.textContent = '42';
+        if (totalCount) totalCount.textContent = '1,337';
+        return;
+      }
+      
+      // 오늘 방문자 수 가져오기 - mode를 'no-cors'로 설정
+      fetch('https://hits.sh/hrshin-dev.github.io.json?view=today&extraTag=today', {
+        mode: 'no-cors',
+        cache: 'no-cache'
       })
-      .catch(error => {
-        console.error('오늘 방문자 수를 가져오는 중 오류 발생:', error);
-      });
-    
-    // 총 방문자 수 가져오기
-    fetch('https://hits.sh/hrshin-dev.github.io.json?view=total&extraTag=total')
-      .then(response => response.json())
-      .then(data => {
-        document.getElementById('total-count').textContent = data.hits || 0;
+        .then(response => {
+          if (!response.ok && response.type !== 'opaque') {
+            throw new Error('네트워크 응답이 올바르지 않습니다');
+          }
+          return response.json();
+        })
+        .then(data => {
+          const todayCount = document.getElementById('today-count');
+          if (todayCount && data && data.hits) {
+            todayCount.textContent = data.hits;
+          }
+        })
+        .catch(error => {
+          console.log('오늘 방문자 수를 가져오는 중 오류 발생, 이미지로 대체합니다');
+          // 이미지 표시
+          const todayImg = document.querySelector('.visitor-today img');
+          if (todayImg) {
+            todayImg.style.display = 'inline';
+            todayImg.width = 'auto';
+            todayImg.height = 'auto';
+          }
+        });
+      
+      // 총 방문자 수 가져오기
+      fetch('https://hits.sh/hrshin-dev.github.io.json?view=total&extraTag=total', {
+        mode: 'no-cors',
+        cache: 'no-cache'
       })
-      .catch(error => {
-        console.error('총 방문자 수를 가져오는 중 오류 발생:', error);
-      });
+        .then(response => {
+          if (!response.ok && response.type !== 'opaque') {
+            throw new Error('네트워크 응답이 올바르지 않습니다');
+          }
+          return response.json();
+        })
+        .then(data => {
+          const totalCount = document.getElementById('total-count');
+          if (totalCount && data && data.hits) {
+            totalCount.textContent = data.hits;
+          }
+        })
+        .catch(error => {
+          console.log('총 방문자 수를 가져오는 중 오류 발생, 이미지로 대체합니다');
+          // 이미지 표시
+          const totalImg = document.querySelector('.visitor-total img');
+          if (totalImg) {
+            totalImg.style.display = 'inline';
+            totalImg.width = 'auto';
+            totalImg.height = 'auto';
+          }
+        });
+    } catch (e) {
+      console.error('방문자 수 처리 중 오류:', e);
+    }
   }
   
-  // 페이지 로드 시 방문자 수 가져오기
-  fetchVisitorCount();
-});
+  // 페이지 로드 시 즉시 실행
+  function init() {
+    console.log('사이드바 초기화 시작');
+    initCategoryToggle();
+    fetchVisitorCount();
+    console.log('사이드바 초기화 완료');
+  }
+  
+  // DOM이 로드된 후 초기화
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
 </script>
 
 <style>
