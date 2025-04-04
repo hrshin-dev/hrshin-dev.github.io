@@ -72,6 +72,26 @@
     </ul>
   </nav>
 
+  <!-- 방문자 통계 -->
+  <div class="visitor-stats mt-2 mb-3 text-center w-100">
+    <div class="visitor-box p-3">
+      <div class="visitor-header d-flex justify-content-around mb-2">
+        <span class="fs-6 visitor-text">Today</span>
+        <span class="fs-6 visitor-text">Total</span>
+      </div>
+      <div class="visitor-counts d-flex justify-content-around">
+        <div class="visitor-today">
+          <span id="today-count" class="fs-5 fw-bold visitor-text">0</span>
+          <img src="https://hits.sh/hrshin-dev.github.io.svg?view=today&extraTag=today&style=flat" alt="오늘 방문자 수" width="0" height="0" style="display: none;">
+        </div>
+        <div class="visitor-total">
+          <span id="total-count" class="fs-5 fw-bold visitor-text">0</span>
+          <img src="https://hits.sh/hrshin-dev.github.io.svg?view=total&extraTag=total&style=flat" alt="총 방문자 수" width="0" height="0" style="display: none;">
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="sidebar-bottom d-flex flex-wrap justify-content-center align-items-center w-100">
     {% unless site.theme_mode %}
       <button type="button" class="btn btn-link nav-link" aria-label="Switch Mode" id="mode-toggle">
@@ -144,5 +164,73 @@ document.addEventListener('DOMContentLoaded', function() {
       chevron.style.transform = 'rotate(0deg)';
     }
   });
+  
+  // 방문자 수 가져오기
+  function fetchVisitorCount() {
+    // 오늘 방문자 수 가져오기
+    fetch('https://hits.sh/hrshin-dev.github.io.json?view=today&extraTag=today')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('today-count').textContent = data.hits || 0;
+      })
+      .catch(error => {
+        console.error('오늘 방문자 수를 가져오는 중 오류 발생:', error);
+      });
+    
+    // 총 방문자 수 가져오기
+    fetch('https://hits.sh/hrshin-dev.github.io.json?view=total&extraTag=total')
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('total-count').textContent = data.hits || 0;
+      })
+      .catch(error => {
+        console.error('총 방문자 수를 가져오는 중 오류 발생:', error);
+      });
+  }
+  
+  // 페이지 로드 시 방문자 수 가져오기
+  fetchVisitorCount();
 });
 </script>
+
+<style>
+.visitor-stats {
+  background-color: rgba(235, 235, 235, 0.1);
+  border-radius: 5px;
+  padding: 8px;
+}
+
+.visitor-item {
+  text-align: center;
+}
+
+.visitor-count {
+  font-weight: bold;
+}
+
+.visitor-box {
+  background-color: rgba(230, 230, 230, 0.3);
+  border: 1px solid rgba(200, 200, 200, 0.4);
+  border-radius: 6px;
+  padding: 5px 15px;
+  min-width: 60px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.visitor-text {
+  color: rgba(108, 117, 125, 0.8);
+}
+
+html[data-mode="dark"] .visitor-stats {
+  background-color: rgba(50, 50, 50, 0.2);
+}
+
+html[data-mode="dark"] .visitor-box {
+  background-color: rgba(60, 60, 60, 0.3);
+  border: 1px solid rgba(80, 80, 80, 0.4);
+}
+
+html[data-mode="dark"] .visitor-text {
+  color: rgba(180, 180, 180, 0.75);
+}
+</style>
