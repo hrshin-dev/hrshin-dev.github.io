@@ -42,7 +42,6 @@
                   <span class="text-muted ms-1">({{ algorithm_posts }})</span>
                 </a>
               </li>
-
               {% assign unity_posts = site.posts | where: "categories", "Unity" | size %}
               <li class="nav-item">
                 <a href="{{ '/categories/unity/' | relative_url }}" class="nav-link">
@@ -51,7 +50,6 @@
                   <span class="text-muted ms-1">({{ unity_posts }})</span>
                 </a>
               </li>
-
               {% assign etc_posts_upper = site.posts | where: "categories", "ETC" | size %}
               {% assign etc_posts_lower = site.posts | where: "categories", "Etc" | size %}
               {% assign etc_posts = etc_posts_upper | plus: etc_posts_lower %}
@@ -108,17 +106,17 @@
 
 <!-- JavaScript -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
   const categoriesToggle = document.getElementById('categories-toggle');
-  if (!categoriesToggle) return;
-
+  if (!categoriesToggle) return; // 요소가 없으면 함수 종료
+  
   const subNav = categoriesToggle.nextElementSibling;
   const chevron = categoriesToggle.querySelector('.fa-chevron-down');
-
-  if (!subNav || !chevron) return;
-
+  
+  // 초기 상태 설정 - 클래스로 관리
   subNav.classList.add('d-none');
-
+  
+  // CSS 트랜지션 추가 - 인라인 스타일 대신 클래스로 관리
   if (!document.getElementById('category-styles')) {
     const styleEl = document.createElement('style');
     styleEl.id = 'category-styles';
@@ -140,14 +138,16 @@ document.addEventListener('DOMContentLoaded', function () {
     `;
     document.head.appendChild(styleEl);
   }
-
-  categoriesToggle.addEventListener('click', function (e) {
+  
+  // 이벤트 위임을 사용하여 문서 레벨에서 처리
+  categoriesToggle.onclick = function(e) {
     e.preventDefault();
     e.stopPropagation();
-
+    
+    // 클래스 토글로 상태 관리
     subNav.classList.toggle('d-none');
     subNav.classList.toggle('show');
     chevron.classList.toggle('chevron-rotate');
-  });
+  };
 });
 </script>
