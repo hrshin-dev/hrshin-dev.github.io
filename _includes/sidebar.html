@@ -104,50 +104,41 @@
   </div>
 </aside>
 
-<!-- JavaScript -->
+<!-- Sidebar JS (at bottom for safety on GitHub Pages) -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const categoriesToggle = document.getElementById('categories-toggle');
-  if (!categoriesToggle) return; // 요소가 없으면 함수 종료
-  
-  const subNav = categoriesToggle.nextElementSibling;
-  const chevron = categoriesToggle.querySelector('.fa-chevron-down');
-  
-  // 초기 상태 설정 - 클래스로 관리
-  subNav.classList.add('d-none');
-  
-  // CSS 트랜지션 추가 - 인라인 스타일 대신 클래스로 관리
-  if (!document.getElementById('category-styles')) {
-    const styleEl = document.createElement('style');
-    styleEl.id = 'category-styles';
-    styleEl.textContent = `
-      .sub-nav {
-        transition: all 0.3s ease;
-        overflow: hidden;
-      }
-      .sub-nav.show {
-        display: block !important;
-      }
-      .sub-nav.d-none {
-        display: none !important;
-      }
-      .chevron-rotate {
-        transform: rotate(180deg);
-        transition: transform 0.3s ease;
-      }
-    `;
-    document.head.appendChild(styleEl);
-  }
-  
-  // 이벤트 위임을 사용하여 문서 레벨에서 처리
-  categoriesToggle.onclick = function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // 클래스 토글로 상태 관리
-    subNav.classList.toggle('d-none');
-    subNav.classList.toggle('show');
-    chevron.classList.toggle('chevron-rotate');
-  };
-});
+(function() {
+  document.addEventListener('DOMContentLoaded', function () {
+    const toggle = document.getElementById('categories-toggle');
+    if (!toggle) return;
+
+    const subNav = toggle.nextElementSibling;
+    const chevron = toggle.querySelector('.fa-chevron-down');
+
+    if (!subNav || !chevron) return;
+
+    toggle.addEventListener('click', function (e) {
+      e.preventDefault();
+      subNav.classList.toggle('d-none');
+      subNav.classList.toggle('show');
+      chevron.classList.toggle('chevron-rotate');
+    });
+  });
+})();
 </script>
+
+<style id="category-styles">
+  .sub-nav {
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  .sub-nav.show {
+    display: block !important;
+  }
+  .sub-nav.d-none {
+    display: none !important;
+  }
+  .chevron-rotate {
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+  }
+</style>
