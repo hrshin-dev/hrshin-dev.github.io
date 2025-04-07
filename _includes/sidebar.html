@@ -34,7 +34,7 @@
               <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
               <i class="fa-fw fas fa-chevron-down ms-auto"></i>
             </a>
-            <ul class="nav sub-nav" style="display: none;">
+            <ul class="nav sub-nav">
               {% assign algorithm_posts = site.posts | where: "categories", "Algorithm" | size %}
               <li class="nav-item">
                 <a href="{{ '/categories/algorithm/' | relative_url }}" class="nav-link">
@@ -138,27 +138,41 @@ document.addEventListener('DOMContentLoaded', function() {
   const subNav = categoriesToggle.nextElementSibling;
   const chevron = categoriesToggle.querySelector('.fa-chevron-down');
   
-  // 초기 상태 설정 (인라인 스타일 속성값 그대로 사용)
-  let isVisible = false;
+  // 초기 상태 설정 - 클래스로 관리
+  subNav.classList.add('d-none');
   
-  // CSS 트랜지션 추가
-  subNav.style.transition = 'all 0.3s ease';
+  // CSS 트랜지션 추가 - 인라인 스타일 대신 클래스로 관리
+  if (!document.getElementById('category-styles')) {
+    const styleEl = document.createElement('style');
+    styleEl.id = 'category-styles';
+    styleEl.textContent = `
+      .sub-nav {
+        transition: all 0.3s ease;
+        overflow: hidden;
+      }
+      .sub-nav.show {
+        display: block !important;
+      }
+      .sub-nav.d-none {
+        display: none !important;
+      }
+      .chevron-rotate {
+        transform: rotate(180deg);
+        transition: transform 0.3s ease;
+      }
+    `;
+    document.head.appendChild(styleEl);
+  }
   
-  categoriesToggle.addEventListener('click', function(e) {
+  // 이벤트 위임을 사용하여 문서 레벨에서 처리
+  categoriesToggle.onclick = function(e) {
     e.preventDefault();
-    e.stopPropagation(); // 이벤트 전파 중지
+    e.stopPropagation();
     
-    // 상태 토글
-    isVisible = !isVisible;
-    
-    // UI 업데이트
-    if (isVisible) {
-      subNav.style.display = 'block';
-      chevron.style.transform = 'rotate(180deg)';
-    } else {
-      subNav.style.display = 'none';
-      chevron.style.transform = 'rotate(0deg)';
-    }
-  });
+    // 클래스 토글로 상태 관리
+    subNav.classList.toggle('d-none');
+    subNav.classList.toggle('show');
+    chevron.classList.toggle('chevron-rotate');
+  };
 });
 </script>
