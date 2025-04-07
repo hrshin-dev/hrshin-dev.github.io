@@ -29,7 +29,7 @@
       {% for tab in site.tabs %}
         <li class="nav-item{% if tab.url == page.url %}{{ " active" }}{% endif %}">
           {% if tab.url == '/categories/' %}
-            <a href="#" class="nav-link" id="categories-toggle">
+            <a href="javascript:void(0)" class="nav-link" id="categories-toggle">
               <i class="fa-fw {{ tab.icon }}"></i>
               <span>{{ site.data.locales[include.lang].tabs.[tab_name] | default: tab.title | upcase }}</span>
               <i class="fa-fw fas fa-chevron-down ms-auto"></i>
@@ -51,7 +51,9 @@
                   <span class="text-muted ms-1">({{ unity_posts }})</span>
                 </a>
               </li>
-              {% assign etc_posts = site.posts | where: "categories", "ETC" | size %}
+              {% assign etc_posts_upper = site.posts | where: "categories", "ETC" | size %}
+              {% assign etc_posts_lower = site.posts | where: "categories", "Etc" | size %}
+              {% assign etc_posts = etc_posts_upper | plus: etc_posts_lower %}
               <li class="nav-item">
                 <a href="{{ '/categories/etc/' | relative_url }}" class="nav-link">
                   <i class="fa-fw fas fa-folder"></i>
@@ -131,12 +133,26 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const categoriesToggle = document.getElementById('categories-toggle');
+  if (!categoriesToggle) return; // 요소가 없으면 함수 종료
+  
   const subNav = categoriesToggle.nextElementSibling;
   const chevron = categoriesToggle.querySelector('.fa-chevron-down');
-
+  
+  // 초기 상태 설정 (인라인 스타일 속성값 그대로 사용)
+  let isVisible = false;
+  
+  // CSS 트랜지션 추가
+  subNav.style.transition = 'all 0.3s ease';
+  
   categoriesToggle.addEventListener('click', function(e) {
     e.preventDefault();
-    if (subNav.style.display === 'none') {
+    e.stopPropagation(); // 이벤트 전파 중지
+    
+    // 상태 토글
+    isVisible = !isVisible;
+    
+    // UI 업데이트
+    if (isVisible) {
       subNav.style.display = 'block';
       chevron.style.transform = 'rotate(180deg)';
     } else {
